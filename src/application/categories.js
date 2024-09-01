@@ -1,3 +1,4 @@
+import Category from "../infrastructure/schemas/Category.js";
 import { createCategoryDto } from "./dto/categories.js";
 
 const categories = [
@@ -9,11 +10,12 @@ const categories = [
   { id: "5", name: "Smart Watch" },
 ];
 
-export const getCategories = (req, res) => {
+export const getCategories = async(req, res) => {
+  const categories = await Category.find();
   return res.status(200).json(categories).send();
 };
 
-export const createCategory = (req, res) => {
+export const createCategory = async (req, res) => {
   // We need make sure that the data will always in the correct format
   const category = createCategoryDto.safeParse(req.body);
 
@@ -21,17 +23,18 @@ export const createCategory = (req, res) => {
     return res.status(400).json({ message: "Invalid data" }).send();
   }
 
-  categories.push({
-    id: category.data.id,
-    name: category.data.name,
-    id: (categories.length + 1).toString(),
-  });
+  // categories.push({
+  //   id: category.data.id,
+  //   name: category.data.name,
+  //   // id: (categories.length + 1).toString(),
+  // });
+  await Category.create({name: category.data.name });
   return res.status(201).send();
 };
 
-export const getCategoryById = (req, res) => {
+export const getCategoryById = async (req, res) => {
   const id = req.params.id;
-  const category = categories.find((category) => category.id === id);
+  const category = await Category.find(id);
   if (!category) {
     return res.status(404).json({ message: "category not found" }).send();
   }
